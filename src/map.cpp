@@ -1,25 +1,24 @@
-#include <iostream>
 #include <ctime>
 #include <cstdlib>
 #include <fstream>
-#include <string>
+#include <cstring>
 #include "../include/Map.h"
 
 using namespace std;
 
 static bool walkable(char c)
-{
-    return c != '#'; // walkable daca e diferit de #
+{ // celula poate fi parcursa daca nu e zid
+    return c != '#';
 }
 
 static bool validateMap(char **mat, int width, int height)
 {
+    // plecam de la niste valori default, pozitii care nu exista pt baza si 0 destinatii sau statii
     int bx = -1, by = -1;
-    int need = 0; // cate D + S trebuie atinse
+    int need = 0;
     int total = width * height;
 
     for (int i = 0; i < height; i++)
-    {
         for (int j = 0; j < width; j++)
         {
             if (mat[i][j] == 'B')
@@ -30,39 +29,29 @@ static bool validateMap(char **mat, int width, int height)
             if (mat[i][j] == 'D' || mat[i][j] == 'S')
                 need++;
         }
-    }
 
-    if (bx == -1 || by == -1)
-        return false; // harta nu s-a generat bine, pt ca nu exista B
-
-    if (need == 0)
-        return false; // harta nu s-a generat bine, pentru ca nu exista niciun client sau statie
-
-    // cream o matrice de marimea height x width doar cu bool false ca sa vedem ce celule am vizitat
-    bool **vis = new bool *[height]; 
+    bool **vis = new bool *[height]; // cream o matrice care sa contina doar pointeri la val de tip boolean pentru a verifica daca am vizitat celula sau nu
     for (int i = 0; i < height; i++)
     {
         vis[i] = new bool[width];
         for (int j = 0; j < width; j++)
-            vis[i][j] = false; // la inceput toate sunt false, pt ca nu am vizitat niciuna
+            vis[i][j] = false; // la inceput toate false
     }
 
+    // cream o coada in care sa tinem vecinii pe care urmeaza sa-i vizitam
     int *qi = new int[total];
     int *qj = new int[total];
-    int head = 0;
-    int tail = 0;
+    int head = 0, tail = 0;
 
-    vis[by][bx] = true;
+    vis[by][bx] = true; // plecam din baza pt a vedea daca exista drum spre S si D
     qi[tail] = by;
     qj[tail] = bx;
     tail++;
 
     int reached = 0;
-
-    while (head < tail)
+    while (head < tail) // cat timp queue-ul exista
     {
-        //scoatem din queue pozitia de analizat
-        int ci = qi[head];
+        int ci = qi[head]; // luama prima valoare a unui vecin
         int cj = qj[head];
         head++;
 
@@ -105,17 +94,12 @@ static bool validateMap(char **mat, int width, int height)
         delete[] vis[i];
     delete[] vis;
 
-    return reached == need; // daca numarul de reach-uri este egal cu cel de need-uri inseamna ca harta e valida, ca a ajuns la fiecare punct la care voiam
+    return reached == need; // daca am ajuns la toate S si D pe care le cautam true si harta e valida, daca nu refacem
 }
 
 void ProceduralMapGenerator::generate(int width, int height)
 {
-    srand((unsigned)time(nullptr));
-
-    const int D = 10, S = 3, B = 1;
-    int total = width * height;
-    
-    char *bag = new char[total];
+    std::srand((unsigned)std::time(0));
 
     char **mat = new char *[height];
     for (int i = 0; i < height; i++)
@@ -126,70 +110,57 @@ void ProceduralMapGenerator::generate(int width, int height)
 
     while (!ok)
     {
-        attempts++;
+        attempts++; // salvam si numarul de attemps pentru a testa daca merge si nu se blocheaza in while ( creare inf )
 
-        const int D = 10, S = 3, B = 1; 
-        int total = height * width; 
-        
-        char *bag = new char[total]; 
-        int k = 0; 
-        for (int i = 0; i < D; i++) 
-            bag[k++] = 'D'; 
-        for (int i = 0; i < S; i++) 
-            bag[k++] = 'S'; 
-        for (int i = 0; i < B; i++) 
-            bag[k++] = 'B'; 
-        
-        const char letters[2] = {'.', '#'}; 
-        
-        while (k < total) { 
-            bag[k++] = letters[rand() % 2]; 
-        } 
-        
-        for (int i = total - 1; i > 0; i--) {
-            int j = rand() % (i + 1); 
-            char tmp = bag[i]; 
-            bag[i] = bag[j]; 
-            bag[j] = tmp; 
-        } 
-          
-        k = 0; 
-        for (int i = 0; i < height; i++) 
-            for (int j = 0; j < width; j++) 
+        const int D = this->destination;
+        const int S = this->station;
+        const int B = 1;
+        int total = height * width;
+
+        // am folosit Fisher–Yates shuffle
+        char *bag = new char[total];
+        int k = 0;
+
+        for (int i = 0; i < D; i++)
+            bag[k++] = 'D';
+        for (int i = 0; i < S; i++)
+            bag[k++] = 'S';
+        for (int i = 0; i < B; i++)
+            bag[k++] = 'B';
+
+        const char letters[2] = {'.', '#'};
+        while (k < total)
+            bag[k++] = letters[std::rand() % 2];
+
+        for (int i = total - 1; i > 0; i--)
+        {
+            int j = std::rand() % (i + 1);
+            char tmp = bag[i];
+            bag[i] = bag[j];
+            bag[j] = tmp;
+        }
+
+        k = 0;
+        for (int i = 0; i < height; i++)
+            for (int j = 0; j < width; j++)
                 mat[i][j] = bag[k++];
 
         ok = validateMap(mat, width, height);
-    }
-
-    if (!ok)
-    {
         delete[] bag;
-        for (int i = 0; i < height; i++)
-            delete[] mat[i];
-        delete[] mat;
-        return;
     }
 
-    cout << "Generated map after " << attempts << " attempts\n";
-
-    // scriem fisierul cand e valid
-    ofstream mapSimulator("mapSimulator.txt");
-    if (mapSimulator.is_open())
+    ofstream out("mapSimulator.txt");
+    if (out.is_open())
     {
         for (int i = 0; i < height; i++)
         {
             for (int j = 0; j < width; j++)
-                mapSimulator << mat[i][j];
-            mapSimulator << '\n';
+                out << mat[i][j];
+            out << "\n";
         }
-        mapSimulator.close();
-    }
-    else
-    {
-        cout << "Error opening file!\n";
+        out.close();
     }
 
-    delete[] bag;
     for (int i = 0; i < height; i++)
         delete[] mat[i];
     delete[] mat;
@@ -199,35 +170,100 @@ void ProceduralMapGenerator::load() {}
 
 void FileMapLoader::load()
 {
-    string buffer;
-    ifstream mapSimulator("mapSimulator.txt");
-
-    if (mapSimulator.is_open())
+    ifstream in("mapSimulator.txt");
+    if (!in.is_open())
+        return;
+    char line[2048];
+    while (in.getline(line, 2048))
     {
-        while (getline(mapSimulator, buffer))
-            cout << buffer << endl;
-
-        mapSimulator.close();
+        std::cout << line << "\n";
     }
+    in.close();
+}
+void FileMapLoader::generate(int, int) {}
+
+bool MapRuntime::inside(int x, int y) const
+{
+    if (x >= 0 && y >= 0 && x < width && y < height)
+        return true;
     else
+        return false;
+}
+
+char MapRuntime::get(int x, int y) const
+{
+    return mat[y][x];
+}
+
+bool MapRuntime::loadFromFile(const char *filename)
+{
+    ifstream f(filename);
+    if (!f.is_open())
+        return false;
+
+    width = 0;
+    height = 0;
+    char line[2048];
+
+    while (f.getline(line, 2048))
     {
-        cout << "Error opening file!" << endl;
+        int len = (int)strlen(line);
+        if (len > width)
+            width = len;
+        height++;
     }
+    f.close();
+    if (width <= 0 || height <= 0) // unit test, daca a fost citit bine fisierul
+        return false;
+
+    mat = new char *[height];
+    for (int i = 0; i < height; i++)
+    {
+        mat[i] = new char[width];
+        for (int j = 0; j < width; j++)
+            mat[i][j] = '.';
+    }
+
+    ifstream g(filename);
+    if (!g.is_open())
+        return false;
+
+    int row = 0;
+    while (g.getline(line, 2048) && row < height)
+    {
+        int len = (int)strlen(line);
+        for (int col = 0; col < width; col++)
+        {
+            if (col < len)
+                mat[row][col] = line[col];
+            else
+                mat[row][col] = '.';
+        }
+        row++;
+    }
+    g.close();
+    return true;
 }
 
-void FileMapLoader::generate(int width, int height) {}
-
-void MapGeneratorContext::setStrategy(IMapGenerator *strategy)
+bool MapRuntime::findFirst(char c, int &outX, int &outY) const
 {
-    this->strategy = strategy;
+    for (int y = 0; y < height; y++)
+        for (int x = 0; x < width; x++)
+            if (mat[y][x] == c)
+            {
+                outX = x;
+                outY = y;
+                return true;
+            }
+    return false;
 }
 
-void MapGeneratorContext::executeGenerate(int width, int height)
+MapRuntime::~MapRuntime()
 {
-    strategy->generate(width, height);
-}
-
-void MapGeneratorContext::executeLoad()
-{
-    strategy->load();
+    if (mat)
+    {
+        for (int i = 0; i < height; i++)
+            delete[] mat[i];
+        delete[] mat;
+    }
 }
