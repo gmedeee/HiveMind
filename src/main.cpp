@@ -1,23 +1,59 @@
+#include <cstdlib>
+#include <ctime>
 #include <iostream>
 #include "../include/Map.h"
+#include "../include/Simulation.h"
+#include "../include/Agent.h"
+#include "../include/Config.h"
+#include "../include/ConfigLoader.h"
 
 using namespace std;
 
+int main() {
+    srand((unsigned)time(0));
 
-int main()
-{
+    Config config;
+    if (!ConfigLoader::load("simulation_setup.txt", config)) {
+        cout <<"Error in opening file!"<<endl; // se vor folosi datele default din config.h
+    }
+
     MapGeneratorContext map;
-    ProceduralMapGenerator generator;
-    FileMapLoader loader;
+    ProceduralMapGenerator gen;
+    gen.setCounts(config.clientsCount,config.maxStations);
 
-    int width = 20;
-    int height = 20;
+    map.setStrategy(&gen);
+    map.executeGenerate(config.mapW, config.mapH);
 
-    map.setStrategy(&generator);
-    map.executeGenerate(width, height);
+    MapRuntime runtimeMap;
+    if (!runtimeMap.loadFromFile("mapSimulator.txt")) {
+        cout << "Error in opening file!"<<endl;
+        return 1;
+    }
 
-    map.setStrategy(&loader);
-    map.executeLoad();
+    int bx = 0, by = 0;
+    if (!runtimeMap.findFirst('B', bx, by)) {
+        cout << "No base found"<<endl;
+        return 1;
+    }
 
-    return 0;
+    Simulation sim(&runtimeMap, config);
+
+    //spawnez angetii
+    for (int i = 0; i < config.drones; i++) {
+        Agent *a = new Drone();
+        a->setPos(bx, by);
+        sim.addAgent(a);
+    }
+    for (int i = 0; i < config.robots; i++) {
+        Agent *a = new Robot();
+        a->setPos(bx, by);
+        sim.addAgent(a);
+    }
+    for (int i = 0; i < config.scooters; i++) {
+        Agent *a = new Scooter();
+        a->setPos(bx, by);
+        sim.addAgent(a);
+    }
+
+    sim.run(config.maxTicks);
 }
