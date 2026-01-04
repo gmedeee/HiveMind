@@ -19,17 +19,17 @@ public:
         total -= c;
     }
 
-    void addDeadAgentPenalty()
+    void addDeadAgent()
     {
         total -= 500;
         deadAgents++;
     }
-    void addLatePenalty()
+    void addLate()
     {
         total -= 50;
         latePackages++;
     }
-    void addUndeliveredPenalty()
+    void addUndelivered()
     {
         total -= 200;
         undeliveredPackages++;

@@ -2,7 +2,8 @@
 #include "../include/Map.h"
 #include "../include/Agent.h"
 
-class AStar
+// algoritmul A* 
+class Pathfinder
 {
     MapRuntime *map; // aici aveam nevoie de harta la runtime ca sa separ logica de loading din fisier de cea pe care lucrez efectiv
     int w;
@@ -28,7 +29,7 @@ class AStar
     int extractMinOpen() const;
 
 public:
-    AStar(MapRuntime *m);
+    Pathfinder(MapRuntime *m);
     bool compute(Agent *a, int sx, int sy, int tx, int ty);
-    ~AStar();
+    ~Pathfinder();
 };

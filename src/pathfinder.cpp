@@ -1,6 +1,6 @@
 #include <iostream>
 #include <limits>
-#include "../include/AStar.h"
+#include "../include/Pathfinder.h"
 
 using namespace std;
 
@@ -13,7 +13,7 @@ static int abs(int x)
         return x;
 }
 
-AStar::AStar(MapRuntime *m) : map(m)
+Pathfinder::Pathfinder(MapRuntime *m) : map(m)
 {
     w = map->getWidth();
     h = map->getHeight();
@@ -26,13 +26,13 @@ AStar::AStar(MapRuntime *m) : map(m)
     closed = new char[n];
 }
 
-int AStar::heuristic(int x1, int y1, int x2, int y2) const
+int Pathfinder::heuristic(int x1, int y1, int x2, int y2) const
 {
     int s = abs(x1 - x2) + abs(y1 - y2);
     return s;
 }
 
-int AStar::extractMinOpen() const
+int Pathfinder::extractMinOpen() const
 {
     int best = -1;
     int bestF = INFINITY;
@@ -50,7 +50,7 @@ int AStar::extractMinOpen() const
     return best;
 }
 
-bool AStar::compute(Agent *a, int sx, int sy, int tx, int ty)
+bool Pathfinder::compute(Agent *a, int sx, int sy, int tx, int ty)
 {
     if (!map->inside(sx, sy) || !map->inside(tx, ty))
         return false;
@@ -142,7 +142,7 @@ bool AStar::compute(Agent *a, int sx, int sy, int tx, int ty)
     return true;
 }
 
-AStar::~AStar()
+Pathfinder::~Pathfinder()
 {
     delete[] g;
     delete[] f;
