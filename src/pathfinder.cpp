@@ -1,17 +1,7 @@
-#include <iostream>
-#include <limits>
 #include "../include/Pathfinder.h"
+#include "../include/Utils.h"
 
 using namespace std;
-
-// fctie pentru distante
-static int abs(int x)
-{
-    if (x < 0)
-        return -x;
-    else
-        return x;
-}
 
 Pathfinder::Pathfinder(MapRuntime *m) : map(m)
 {
@@ -28,14 +18,13 @@ Pathfinder::Pathfinder(MapRuntime *m) : map(m)
 
 int Pathfinder::heuristic(int x1, int y1, int x2, int y2) const
 {
-    int s = abs(x1 - x2) + abs(y1 - y2);
-    return s;
+    return absT(x1 - x2) + absT(y1 - y2);
 }
 
 int Pathfinder::extractMinOpen() const
 {
     int best = -1;
-    int bestF = INFINITY;
+    int bestF =100000;
     for (int i = 0; i < n; i++)
     {
         if (open[i])
@@ -59,8 +48,8 @@ bool Pathfinder::compute(Agent *a, int sx, int sy, int tx, int ty)
 
     for (int i = 0; i < n; i++)
     {
-        g[i] = INFINITY;
-        f[i] = INFINITY;
+        g[i] =100000;
+        f[i] = 100000;
         parent[i] = -1;
         open[i] = 0;
         closed[i] = 0;

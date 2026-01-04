@@ -99,7 +99,7 @@ static bool validateMap(char **mat, int width, int height)
 
 void ProceduralMapGenerator::generate(int width, int height)
 {
-    std::srand((unsigned)std::time(0));
+    srand((unsigned)time(0));
 
     char **mat = new char *[height];
     for (int i = 0; i < height; i++)
@@ -130,11 +130,11 @@ void ProceduralMapGenerator::generate(int width, int height)
 
         const char letters[2] = {'.', '#'};
         while (k < total)
-            bag[k++] = letters[std::rand() % 2];
+            bag[k++] = letters[rand() % 2];
 
         for (int i = total - 1; i > 0; i--)
         {
-            int j = std::rand() % (i + 1);
+            int j = rand() % (i + 1);
             char tmp = bag[i];
             bag[i] = bag[j];
             bag[j] = tmp;
@@ -176,7 +176,7 @@ void FileMapLoader::load()
     char line[2048];
     while (in.getline(line, 2048))
     {
-        std::cout << line << "\n";
+        cout << line << "\n";
     }
     in.close();
 }
@@ -213,7 +213,7 @@ bool MapRuntime::loadFromFile(const char *filename)
         height++;
     }
     f.close();
-    if (width <= 0 || height <= 0) // unit test, daca a fost citit bine fisierul
+    if (width <= 0 || height <= 0) 
         return false;
 
     mat = new char *[height];

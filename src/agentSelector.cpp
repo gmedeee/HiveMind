@@ -16,7 +16,7 @@ Agent *AgentSelector::packageAgent(int tick, Package &p, Agent **agents, int age
     Position dest = clients[j].getPos();
 
     Agent *best = 0;
-    int bestScore = -INFINITY;
+    int bestScore = -100000;
 
     for (int i = 0; i < agentCount; i++)
     {
@@ -29,7 +29,7 @@ Agent *AgentSelector::packageAgent(int tick, Package &p, Agent **agents, int age
 
         Position ap = a->getPos();
         int dist = manhattan(ap.getX(), ap.getY(), dest.getX(), dest.getY());
-        int eta = cellDiv(dist, a->getSpeed());
+        int eta = cellDiv(dist, a->getSpeed());  // implementata pentru a vedea de cate tick-uri e nev (dist/speed = timp)
 
         int score = p.getReward() - eta * a->getCost();
         if (tick + eta > p.getDueTick())

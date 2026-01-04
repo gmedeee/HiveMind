@@ -1,7 +1,6 @@
-SIMULATION REPORT
 Ticks: 1000
 Packages Total: 50
 Packages Delivered: 50
 Agents Total: 6
 Agents Lost (DEAD): 0
-Final Profit: 21725
+Final Profit: 20539

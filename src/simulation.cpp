@@ -107,7 +107,7 @@ void Simulation::chargeAgent(Agent *a)
 int Simulation::nearestCharger(Agent *a, int &outX, int &outY) const
 {
     Position p = a->getPos();
-    int bestD = INFINITY;
+    int bestD = 100000;
     int bx = baseX, by = baseY;
 
     for (int i = 0; i < chargerCount; i++)
